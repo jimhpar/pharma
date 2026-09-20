@@ -41,3 +41,8 @@ storage/framework/views/*
 !storage/framework/cache/.gitignore
 !storage/framework/sessions/.gitignore
 !storage/framework/views/.gitignore
+
+# Legacy duplicate directories & legacy dumps
+adorzotno-frontend/
+adorzotno.sql
+start-local.bat
