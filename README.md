@@ -15,29 +15,41 @@ A full-stack enterprise Pharmacy Management & E-Commerce ecosystem comprising a 
 
 ---
 
-## 📋 Prerequisites
+## 📋 Prerequisites / প্রয়োজনীয় সফটওয়্যার
 
 Before running the setup, ensure your system has the following installed:
-1. **PHP 8.2 or 8.3** (with `pdo_mysql`, `curl`, `mbstring`, `zip` extensions enabled)
+1. **PHP 8.2 or 8.3** (with `pdo_mysql`, `curl`, `mbstring`, `zip`, `fileinfo` extensions enabled)
 2. **Composer 2.x**
 3. **Node.js 18+ or 20+** & **npm**
-4. **MySQL 8.x** (running on port 3306)
+4. **MySQL 8.x** (running on default port 3306)
 
-> **Tip for Windows Users:** [Laragon](https://laragon.org/) provides PHP, Composer, Node.js, and MySQL out-of-the-box in a portable setup.
+> **💡 Tip for Windows Users:** You can use [Laragon](https://laragon.org/) (Full version) which includes PHP, Composer, Node.js, and MySQL out-of-the-box. Just start Laragon and MySQL!
 
 ---
 
 ## 🚀 Quick Start (Automated 1-Command Setup)
 
-Clone the repository, open PowerShell in the project root folder, and run:
+### English:
+1. Clone this repository:
+   ```powershell
+   git clone https://github.com/jimhpar/pharma.git
+   cd pharma
+   ```
+2. Run the automated setup script in PowerShell:
+   ```powershell
+   .\setup.ps1
+   ```
 
-```powershell
-.\setup.ps1
-```
+### বাংলা নির্দেশনা:
+১. রিপোজিটরিটি ক্লোন করে প্রোজেক্ট ফোল্ডারে PowerShell ওপেন করুন।
+২. শুধুমাত্র নিচের কমান্ডটি দিয়ে এন্টার দিন:
+   ```powershell
+   .\setup.ps1
+   ```
 
 ### What `setup.ps1` does automatically:
 - Checks all prerequisites (PHP, Composer, Node, MySQL).
-- Automatically connects to MySQL, creates the database `adorzotno`, and imports the complete database dump (`database/adorzotno_complete.sql`) containing all 6,003 products, 4,000 seeded inventory stocks, batches, categories, and admin accounts.
+- Connects to MySQL, creates the database `adorzotno`, and imports the complete database dump (`database/adorzotno_complete.sql`) containing all 6,003 products, 4,000 seeded inventory stocks, batches, categories, and admin accounts without any data loss.
 - Sets up `.env` files for `ecommerce-api` and `pos`, and `.env.local` for `adorzotno`.
 - Runs `composer install` for both Laravel backends.
 - Generates application encryption keys (`php artisan key:generate`).
@@ -45,19 +57,24 @@ Clone the repository, open PowerShell in the project root folder, and run:
 
 ---
 
-## ⚡ Running the Applications
+## ⚡ Running the Applications (1-Click Run)
 
 ### Option A: One-Click Runner (Recommended)
-Double-click `start.bat` in the project root folder, or run:
+Simply **double-click `start.bat`** in the project folder, or run:
 
 ```powershell
 .\run.ps1
 ```
 
-This launches all three applications simultaneously and opens `http://localhost:3000` in your default browser.
+This concurrently launches:
+- **Ecommerce API** on `http://localhost:8000`
+- **POS Admin** on `http://localhost:8001`
+- **Next.js Storefront** on `http://localhost:3000`
+
+And automatically opens `http://localhost:3000` in your default browser.
 
 ### Option B: Stopping the Applications
-To stop all three running services cleanly at any time:
+To stop all three running servers cleanly at any time, run:
 
 ```powershell
 .\stop.ps1
@@ -67,7 +84,7 @@ To stop all three running services cleanly at any time:
 
 ## 🔑 Default Credentials & Access URLs
 
-| Portal | URL | Credentials |
+| Portal | URL | Credentials / Notes |
 | :--- | :--- | :--- |
 | **Storefront Website** | `http://localhost:3000` | Browse & purchase products directly |
 | **POS / Admin Dashboard** | `http://localhost:8001` | **Email:** `admin@gmail.com`<br>**Password:** `12345678` |
@@ -78,36 +95,14 @@ To stop all three running services cleanly at any time:
 ## 📦 Key Modules in POS & Admin
 
 - **Available Stock Management** (`/available-stock/show`):
-  - View real-time Central Stock (aggregated across all warehouses) and individual branch breakdowns (Mirpur, Banani, Uttara).
+  - View real-time **Central Stock** (aggregated across all warehouses) and individual branch breakdowns (**Mirpur**, **Banani**, **Uttara**).
   - Search by Product Name, SKU ID / Code, or Barcode.
-  - Track Manufacture Dates & Expiry Dates for each batch.
-  - Add, Edit, and Delete stock batches with instant live reflection on the online storefront.
+  - Track **Manufacture Dates** & **Expiry Dates** for each batch.
+  - **Add, Edit, and Delete** stock batches with instant live reflection on the online storefront.
 - **Point of Sale (POS)** (`/pos`):
   - Rapid barcode scanning, strip/medicine unit calculations, and receipt printing.
 - **Inventory Documents**:
   - Purchase Orders, Opening Stock, Stock Issues, Adjustments, and Stock Transfers between branches.
-
----
-
-## 📤 Uploading to GitHub
-
-To push this repository to GitHub:
-
-```bash
-# 1. Initialize git (if not already initialized)
-git init
-
-# 2. Stage all files (the configured .gitignore ensures vendor and node_modules are excluded while code, assets, and the complete database dump are saved)
-git add .
-
-# 3. Commit
-git commit -m "feat: complete Adorzotno e-commerce and POS stack with automated setup and seeded database"
-
-# 4. Link to your GitHub repository and push
-git branch -M main
-git remote add origin https://github.com/<YOUR_USERNAME>/<YOUR_REPO_NAME>.git
-git push -u origin main
-```
 
 ---
 
