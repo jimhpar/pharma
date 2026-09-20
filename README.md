@@ -4,14 +4,118 @@ A full-stack enterprise Pharmacy Management & E-Commerce ecosystem comprising a 
 
 ---
 
-## 🏛️ Architecture & Services
+## 🏛️ Architecture & Services Overview
 
 | Component | Technology | Directory | Default Port | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **Storefront** | Next.js 14, React, TailwindCSS, Redux | `adorzotno/` | `http://localhost:3000` | Customer-facing medicine & personal care shop |
-| **POS & Admin** | Laravel 11, Blade, Bootstrap, DataTables | `adorzotno-pos/pos/` | `http://localhost:8001` | Pharmacy Point of Sale, multi-branch inventory & reports |
+| **Storefront** | Next.js 14, React, TailwindCSS, Redux Toolkit | `adorzotno/` | `http://localhost:3000` | Customer-facing medicine & personal care shop |
+| **POS & Admin** | Laravel 11, Blade, Bootstrap 5, DataTables | `adorzotno-pos/pos/` | `http://localhost:8001` | Pharmacy Point of Sale, multi-branch inventory & reports |
 | **Storefront API** | Laravel 11 REST API, Sanctum | `adorzotno-pos/ecommerce-api/` | `http://localhost:8000` | High-performance catalog, cart, and order API |
 | **Database** | MySQL 8.x | `database/` | `3306` (`adorzotno`) | Complete pre-seeded database with 6,003 products & stocks |
+
+---
+
+## 📐 System Architecture
+
+### 1. High-Level Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Clients ["Client Layer (Browsers & Devices)"]
+        Customer["🛒 Customer / Shopper<br/>(Web & Mobile Browsers)"]
+        AdminStaff["💊 Cashier / Store Manager / Admin<br/>(POS Terminal & Desktop)"]
+    end
+
+    subgraph Presentation ["Presentation & Frontend Layer"]
+        StorefrontApp["Next.js 14 Storefront<br/>(Port 3000)<br/>• React Components<br/>• Redux Toolkit Query<br/>• TailwindCSS & UI Engine"]
+        AdminPortal["Laravel Blade POS UI<br/>(Port 8001)<br/>• POS Cashier Register<br/>• Stock & Batch Management<br/>• Purchase & Reports"]
+    end
+
+    subgraph BackendServices ["Application & API Service Layer"]
+        EcommerceAPI["Ecommerce REST API<br/>(Port 8000)<br/>• Product Catalog & Filter Service<br/>• Cart & Order Processing<br/>• Live Stock Validation<br/>• Laravel Sanctum Auth"]
+        PosService["POS Core Engine<br/>(Port 8001)<br/>• Multi-Branch Inventory Service<br/>• FIFO Batch & Expiry Tracking<br/>• Audit Trail (Transactions)<br/>• SSO Auth & Permissions (RBAC)"]
+    end
+
+    subgraph DataStorage ["Data & Media Storage Layer"]
+        MySQL[("MySQL 8.x Database<br/>(adorzotno:3306)<br/>• products & product_skus<br/>• stock_balances & batches<br/>• orders & order_items<br/>• branches & warehouses<br/>• users & permissions")]
+        MediaAssets["Static Asset Storage<br/>(pos/public/)<br/>• productImage/ (Medicine images)<br/>• bannerImage/ (Promo banners)"]
+    end
+
+    %% Interactions
+    Customer -->|HTTP / React SSR & CSR| StorefrontApp
+    AdminStaff -->|HTTP / Blade Sessions| AdminPortal
+
+    StorefrontApp -->|REST API / JSON| EcommerceAPI
+    AdminPortal -->|Internal Controller & Services| PosService
+
+    StorefrontApp -.->|Fetch Media Assets| MediaAssets
+    EcommerceAPI -->|Query & Validate Stock| MySQL
+    PosService -->|Transactions & Balances| MySQL
+
+    StorefrontApp -->|Admin SSO Auto-Redirect| AdminPortal
+```
+
+---
+
+### 2. Architectural Layers & Responsibilities
+
+#### A. Client & Presentation Layer
+- **Next.js Customer Storefront (`:3000`)**:
+  - Built with Next.js 14 App Router, React 18, TailwindCSS, and Redux Toolkit (`productApi`, `cartApi`, `authApi`).
+  - Features real-time search, category navigation, dynamic medicine dosage display, brand filters, and full cart checkout.
+  - Automatically queries the `ecommerce-api` to display accurate **"In Stock"** vs **"Out of Stock"** status and disables checkout if inventory is depleted.
+- **POS & Admin Dashboard (`:8001`)**:
+  - Built with Laravel Blade, Bootstrap 5, and server-side DataTables.
+  - Provides rapid barcode checkout for physical pharmacy counters, prescription uploads, inventory receiving, batch tracking, and sales analytics.
+
+#### B. Application & API Layer
+- **Ecommerce REST API (`:8000`)**:
+  - Stateless JSON API built on Laravel 11.
+  - Serves product endpoints (`/api/products/{slug}`, `/api/products/flash-deals`, `/api/products/trending`).
+  - Calculates real-time available stock per SKU dynamically by querying `stock_balances` across warehouses:
+    $$\text{Available Stock} = \sum \max(0, \text{available\_quantity} - \text{reserved\_quantity})$$
+- **POS & Inventory Service Engine (`:8001`)**:
+  - Manages warehouse allocations, stock transfers between branches, purchase orders, and inventory adjustments.
+  - Incorporates **Single Sign-On (SSO)**: When an admin logs in on the storefront, the API returns `admin_redirect_url` with an encrypted one-time token that automatically authenticates and redirects them into the POS Admin dashboard on port 8001.
+
+#### C. Data & Persistence Layer
+- **Unified MySQL Database (`adorzotno:3306`)**:
+  - Both `ecommerce-api` and `pos` connect to the same central database, guaranteeing **100% data consistency** without asynchronous synchronization delays.
+  - Core Schema Entities:
+    - `products` & `product_skus`: Catalog, generic names, pricing, dosage, and strengths.
+    - `branches` & `warehouses`: Multi-branch hierarchy (Mirpur Warehouse, Banani Warehouse, Uttara Warehouse).
+    - `stock_balances`: Warehouse-level real-time inventory counts indexed by `(branch_id, warehouse_id, sku_id, batch_id)`.
+    - `inventory_batches`: FIFO batch management with batch numbers, purchase costs, manufacture dates (`manufacture_date`), and expiry dates (`expiry_date`).
+    - `inventory_transactions`: Immutable double-entry audit log of every stock movement (purchases, opening stock, adjustments, transfers, and sales).
+
+---
+
+### 3. Real-Time Stock Lifecycle & Sync Workflow
+
+```
+[Admin / Warehouse Staff]
+        │
+        ▼
+   (Add / Edit / Delete Stock)
+        │
+        ▼
+┌────────────────────────────────────────────────────────┐
+│  AvailableStockController (Port 8001)                  │
+│  1. Updates `inventory_batches` (batch_no, mfg, exp)   │
+│  2. Updates `stock_balances` (available_quantity)      │
+│  3. Logs audit trail in `inventory_transactions`       │
+└────────────────────────────────────────────────────────┘
+        │
+        ├──► POS Screen (Port 8001): Immediately sees new batch & available stock
+        │
+        └──► Storefront API (Port 8000):
+             BaseApiController reads updated `stock_balances`
+                  │
+                  ▼
+             Next.js Storefront (Port 3000):
+             Product instantly switches from "Out of Stock" to "In Stock",
+             updating live available quantity and enabling "Add to Cart"!
+```
 
 ---
 
