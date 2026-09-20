@@ -1,0 +1,807 @@
+{
+  "info": {
+    "_postman_id": "c1ec7e4f-3f85-4ce0-98d9-adorzotno-ecommerce-api",
+    "name": "Adorzotno Ecommerce API",
+    "description": "Customer-facing ecommerce API for Adorzotno.\n\nAuthentication is session-based. In Postman, call `Auth / Login` first, then use the protected endpoints in the same collection so Postman can reuse the session cookie.\n\nCommon response shape:\n- `status`: `success` or `error`\n- `message`: human-readable message\n- `data`: response payload\n- `errors`: validation or error details\n\nCollection variables:\n- `base_url`: API base URL\n- `product_id`, `category_id`, `brand_id`, `order_id`, `review_id`, `sku_id`: helper IDs for quick testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/api"
+    },
+    {
+      "key": "product_id",
+      "value": "1"
+    },
+    {
+      "key": "category_id",
+      "value": "1"
+    },
+    {
+      "key": "brand_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    },
+    {
+      "key": "review_id",
+      "value": "1"
+    },
+    {
+      "key": "sku_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Register, login, inspect the current session user, update profile, and logout.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"01700000000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Create a new customer-linked account and start a logged-in session."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password. Postman should retain the session cookie for later protected requests."
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Return the current authenticated user and linked customer profile."
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"01700000001\",\n  \"password\": \"newpassword\",\n  \"password_confirmation\": \"newpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/update-profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "update-profile"
+              ]
+            },
+            "description": "Update the logged-in user's profile. Password fields are optional."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Invalidate the current session."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Browse products, categories, brands, and storefront discovery endpoints.",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?page=1&per_page=20&category_id=&brand_id=&min_price=&max_price=&in_stock=&sort_by=created_at&sort_order=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "brand_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "min_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "max_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "in_stock",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Paginated storefront product list. Supports category, brand, price, stock, and sorting filters."
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/search?q=vitamin&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "vitamin"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search active online products by name/description."
+          }
+        },
+        {
+          "name": "Product Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Get one product with images, category, brand, and approved reviews."
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            },
+            "description": "Return active categories for storefront filtering."
+          }
+        },
+        {
+          "name": "Products By Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/categories/{{category_id}}/products?per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categories",
+                "{{category_id}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get storefront products for one category."
+          }
+        },
+        {
+          "name": "List Brands",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            },
+            "description": "Return active brands for storefront filtering."
+          }
+        },
+        {
+          "name": "Products By Brand",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_id}}/products?per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_id}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get storefront products for one brand."
+          }
+        },
+        {
+          "name": "Trending Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/trending?limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "trending"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get trending products. Ranking is based on sold quantity when order history exists."
+          }
+        },
+        {
+          "name": "Related Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/related/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "related",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Get related products for one product, prioritized by category and price similarity."
+          }
+        },
+        {
+          "name": "Product Reviews",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}/reviews?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{product_id}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get approved reviews for a product."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "description": "Validate client-side cart contents and apply coupons.",
+      "item": [
+        {
+          "name": "Sync Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": 5,\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "sync"
+              ]
+            },
+            "description": "Validate products and quantities from the frontend cart. Returns valid items, total, and per-item errors."
+          }
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coupon_code\": \"SAVE10\",\n  \"total_amount\": 100.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/apply-coupon",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "apply-coupon"
+              ]
+            },
+            "description": "Validate a coupon against the order total and return discount details."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Authenticated checkout and customer order history.",
+      "item": [
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ],\n  \"shipping_address\": \"123 Main St, Dhaka\",\n  \"phone\": \"01700000000\",\n  \"shipment_zone_id\": 1,\n  \"notes\": \"Please deliver in the morning\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/checkout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "checkout"
+              ]
+            },
+            "description": "Create a new order from cart-like payload. Requires an authenticated session."
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get paginated order history for the logged-in customer."
+          }
+        },
+        {
+          "name": "Order Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}"
+              ]
+            },
+            "description": "Get one order with item details."
+          }
+        },
+        {
+          "name": "Order Invoice",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/invoice",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}",
+                "invoice"
+              ]
+            },
+            "description": "Get invoice-oriented order payload for the logged-in customer."
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancel a pending order only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "description": "Wishlist is customer-scoped. Public list returns an empty array for guests. Writes require login.",
+      "item": [
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/wishlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist"
+              ]
+            },
+            "description": "Get the logged-in customer's wishlist. Guests receive an empty list."
+          }
+        },
+        {
+          "name": "Add To Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku_id\": {{sku_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/wishlist/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist",
+                "add"
+              ]
+            },
+            "description": "Add one SKU to the logged-in customer's wishlist."
+          }
+        },
+        {
+          "name": "Remove From Wishlist",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sku_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist",
+                "{{sku_id}}"
+              ]
+            },
+            "description": "Remove one SKU from the logged-in customer's wishlist."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "description": "Authenticated review management. Creating a review requires a previous purchase.",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{product_id}},\n  \"rating\": 5,\n  \"comment\": \"Great product!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "description": "Create a review for a purchased product. New reviews are stored as pending for moderation."
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Good product overall\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            },
+            "description": "Update one of the logged-in customer's reviews."
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            },
+            "description": "Delete one of the logged-in customer's reviews."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Promotions",
+      "description": "Read-only storefront promotion endpoints.",
+      "item": [
+        {
+          "name": "List Promotions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/promotions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "promotions"
+              ]
+            },
+            "description": "Get active promotions with linked category information."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "description": "Storefront recommendation endpoints. Personalized results require login.",
+      "item": [
+        {
+          "name": "Get Recommendations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommendations"
+              ]
+            },
+            "description": "Get personalized recommendations for logged-in customers, or trending fallback for guests."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "description": "Storefront configuration and shipping info.",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "description": "Get store identity fields such as name, phone, email, address, and currency."
+          }
+        },
+        {
+          "name": "Get Shipping Info",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shipping-info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "shipping-info"
+              ]
+            },
+            "description": "Get default shipping cost, free shipping threshold, and active shipping zones."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1265 @@
+{
+  "info": {
+    "_postman_id": "c1ec7e4f-3f85-4ce0-98d9-adorzotno-ecommerce-api",
+    "name": "Adorzotno Ecommerce API",
+    "description": "Customer-facing ecommerce API for Adorzotno.\n\nAuthentication uses Laravel Sanctum bearer tokens. Call `Auth / Login` or `Auth / Register`, copy the returned `data.token` into the `api_token` collection variable, then call protected endpoints.\n\nCommon response shape:\n- `status`: `success` or `error`\n- `message`: human-readable message\n- `data`: response payload\n- `errors`: validation or error details\n\nProduct payloads include `selling_price`, `stock`, `available_stock`, and `in_stock` values calculated from live SKU stock balances. SKU payloads include their own `selling_price` and stock summaries. Wishlist, order list, and order details responses include the same decorated nested SKU/product selling price fields.\n\nCollection variables:\n- `base_url`: API base URL\n- `api_token`: Sanctum bearer token for authenticated requests\n- `product_slug`, `category_slug`, `brand_slug`: helper slugs for storefront endpoints\n- `product_id`, `category_id`, `brand_id`, `order_id`, `review_id`, `sku_id`, `banner_id`, `faq_id`: helper IDs for quick testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/api"
+    },
+    {
+      "key": "api_token",
+      "value": ""
+    },
+    {
+      "key": "product_id",
+      "value": "1"
+    },
+    {
+      "key": "category_id",
+      "value": "1"
+    },
+    {
+      "key": "brand_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    },
+    {
+      "key": "review_id",
+      "value": "1"
+    },
+    {
+      "key": "sku_id",
+      "value": "1"
+    },
+    {
+      "key": "product_slug",
+      "value": "paracetamol-500mg"
+    },
+    {
+      "key": "category_slug",
+      "value": "medicine"
+    },
+    {
+      "key": "brand_slug",
+      "value": "acme-pharma"
+    },
+    {
+      "key": "banner_id",
+      "value": "1"
+    },
+    {
+      "key": "faq_id",
+      "value": "1"
+    },
+    {
+      "key": "product_type",
+      "value": "standard"
+    },
+    {
+      "key": "generic_name",
+      "value": "Paracetamol"
+    },
+    {
+      "key": "brand_sort_by",
+      "value": "most_popular"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Register, login, inspect the current user, update profile, change password, and logout.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"01700000000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Create a new customer-linked account and return a Sanctum token."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password. Copy `data.token` into the `api_token` collection variable for protected requests."
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Return the current authenticated user and linked customer profile."
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"01700000001\",\n  \"billing_address\": \"House 12, Road 5, Dhanmondi, Dhaka\",\n  \"shipping_address\": \"House 12, Road 5, Dhanmondi, Dhaka\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/update-profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "update-profile"
+              ]
+            },
+            "description": "Update the logged-in user's profile and linked customer addresses. This endpoint does not change passwords."
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current\": \"password123\",\n  \"new\": \"newpassword123\",\n  \"confirm\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "Change the authenticated user's password. Also accepts `current_password`, `new_password`, and `new_password_confirmation` aliases."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Invalidate the current bearer token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Browse products, categories, brands, banners, and storefront discovery endpoints. Product/category/brand detail routes use slugs. Product responses include live stock summaries from SKU stock balances.",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?page=1&per_page=20&category_slug=&brand_slug=&category_id=&brand_id=&min_price=&max_price=&in_stock=&sort_by=created_at&sort_order=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "category_slug",
+                  "value": "{{category_slug}}",
+                  "disabled": true
+                },
+                {
+                  "key": "brand_slug",
+                  "value": "{{brand_slug}}",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "brand_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "min_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "max_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "in_stock",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Paginated storefront product list. Use category_slug and brand_slug for new clients; category_id and brand_id remain as legacy optional filters. Responses include product-level and SKU-level stock summaries. The in_stock filter and sort_by=quantity use live available stock from stock_balances."
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/search?q=vitamin&per_page=20&category_slug=&brand_slug=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "vitamin"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "category_slug",
+                  "value": "{{category_slug}}",
+                  "disabled": true
+                },
+                {
+                  "key": "brand_slug",
+                  "value": "{{brand_slug}}",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search active online products by name, short description, or long description. Optional filters mirror the product list. Responses include product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Product Details By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/{{product_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{product_slug}}"
+              ]
+            },
+            "description": "Get one product by slug with images, categories, brand tags/certifications, SKU details, stock summaries, active warnings, and approved reviews."
+          }
+        },
+        {
+          "name": "Featured Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/featured?per_page=20&sort_by=created_at&sort_order=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "featured"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get paginated products where is_featured is enabled. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Flash Deals Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/flash-deals?per_page=20&sort_by=created_at&sort_order=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "flash-deals"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get paginated products where is_flash_deals is enabled. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Products By Product Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/product-type/{{product_type}}?per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "product-type",
+                "{{product_type}}"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get paginated products by product_type. Example values: standard, variant_parent, combo, service. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Products By Generic Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/generic-name/{{generic_name}}?per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "generic-name",
+                "{{generic_name}}"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get paginated products by exact generic_name. URL-encode values that contain spaces. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            },
+            "description": "Return active categories for storefront filtering. Categories may include image in addition to icon."
+          }
+        },
+        {
+          "name": "Products By Category Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/categories/{{category_slug}}/products?per_page=20&sort_by=created_at&sort_order=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categories",
+                "{{category_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get storefront products for one category by slug. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "List Brands",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            },
+            "description": "Return active brands for storefront filtering. Brands include tags and certifications."
+          }
+        },
+        {
+          "name": "Products By Brand Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_slug}}/products?per_page=20&sort_by={{brand_sort_by}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "{{brand_sort_by}}"
+                },
+                {
+                  "key": "min_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "max_price",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "in_stock",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get storefront products for one brand by slug. Supported sort_by values include most_popular, price_high_to_low, price_low_to_high, highest_rated, created_at, selling_price, name, and quantity. Responses include live stock summaries; in_stock and quantity sorting use available stock from stock_balances."
+          }
+        },
+        {
+          "name": "Brand Products - Most Popular",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_slug}}/products?per_page=20&sort_by=most_popular",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "most_popular"
+                }
+              ]
+            },
+            "description": "Sort brand products by products.is_popular first."
+          }
+        },
+        {
+          "name": "Brand Products - Price High To Low",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_slug}}/products?per_page=20&sort_by=price_high_to_low",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "price_high_to_low"
+                }
+              ]
+            },
+            "description": "Sort brand products by highest SKU price first, using online_price and falling back to retail_price."
+          }
+        },
+        {
+          "name": "Brand Products - Price Low To High",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_slug}}/products?per_page=20&sort_by=price_low_to_high",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "price_low_to_high"
+                }
+              ]
+            },
+            "description": "Sort brand products by lowest SKU price first, using online_price and falling back to retail_price."
+          }
+        },
+        {
+          "name": "Brand Products - Highest Rated",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/brands/{{brand_slug}}/products?per_page=20&sort_by=highest_rated",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "{{brand_slug}}",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "highest_rated"
+                }
+              ]
+            },
+            "description": "Sort brand products by highest product_skus.rating first."
+          }
+        },
+        {
+          "name": "Trending Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/trending?limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "trending"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get trending products. Ranking is based on sold quantity when order history exists. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Related Products By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/related/{{product_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "related",
+                "{{product_slug}}"
+              ]
+            },
+            "description": "Get related products for one product slug, prioritized by category and price similarity. Responses include live product-level and SKU-level stock summaries."
+          }
+        },
+        {
+          "name": "Product Reviews By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/{{product_slug}}/reviews?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{product_slug}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get approved reviews for a product by slug."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banners",
+      "description": "Public storefront banner endpoints.",
+      "item": [
+        {
+          "name": "List Banners",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/banners?banner_type=&position=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "banners"
+              ],
+              "query": [
+                {
+                  "key": "banner_type",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "position",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get active banners. banner_type may be slider, homepage_middle_1, or homepage_middle_2. position may be small_top, small_bottom, or large and only applies to homepage_middle_1/homepage_middle_2."
+          }
+        },
+        {
+          "name": "Banner Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/banners/{{banner_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "banners",
+                "{{banner_id}}"
+              ]
+            },
+            "description": "Get one active banner by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "FAQs",
+      "description": "Public storefront frequently asked question endpoints.",
+      "item": [
+        {
+          "name": "List FAQs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/faqs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "faqs"
+              ]
+            },
+            "description": "Get all frequently asked questions."
+          }
+        },
+        {
+          "name": "FAQ Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/faqs/{{faq_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "faqs",
+                "{{faq_id}}"
+              ]
+            },
+            "description": "Get one frequently asked question by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "description": "Validate client-side cart contents and apply coupons.",
+      "item": [
+        {
+          "name": "Sync Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": 5,\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "sync"
+              ]
+            },
+            "description": "Validate products and quantities from the frontend cart. Returns valid items, total, and per-item errors."
+          }
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coupon_code\": \"SAVE10\",\n  \"total_amount\": 100.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/apply-coupon",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "apply-coupon"
+              ]
+            },
+            "description": "Validate a coupon against the order total and return discount details."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Authenticated checkout and customer order history.",
+      "item": [
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ],\n  \"shipping_address\": \"123 Main St, Dhaka\",\n  \"phone\": \"01700000000\",\n  \"coupon_code\": \"SAVE10\",\n  \"shipment_zone_id\": 1,\n  \"notes\": \"Please deliver in the morning\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/checkout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "checkout"
+              ]
+            },
+            "description": "Create a new order from cart-like payload. Requires a bearer token. When coupon_code is provided, checkout revalidates and records the coupon usage before applying the discount. When shipment_zone_id is provided, checkout uses the active zone's charge as shipping_fee and includes it in total_amount. Checkout deducts live stock from the active online branch warehouse and records sale inventory transactions."
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get paginated order history for the logged-in customer. Item SKU payloads include `selling_price`; nested `sku.product` payloads include product-level `selling_price`, matching product list/detail responses."
+          }
+        },
+        {
+          "name": "Order Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}"
+              ]
+            },
+            "description": "Get one order with item details. Item SKU payloads include `selling_price`; nested `sku.product` payloads include product-level `selling_price`, matching product list/detail responses."
+          }
+        },
+        {
+          "name": "Order Invoice",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/invoice",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}",
+                "invoice"
+              ]
+            },
+            "description": "Get invoice-oriented order payload for the logged-in customer."
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancel a pending order only. Cancellation restores the stock allocated during checkout and records sale_cancel inventory transactions."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "description": "Wishlist is customer-scoped. All wishlist endpoints require login. Wishlist item SKU payloads include `selling_price`; nested `sku.product` payloads include product-level `selling_price`, matching product list/detail responses.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{api_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/wishlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist"
+              ]
+            },
+            "description": "Get the logged-in customer's wishlist. Requires a Sanctum bearer token. Each item includes decorated nested SKU/product pricing: `sku.selling_price` and `sku.product.selling_price`."
+          }
+        },
+        {
+          "name": "Add To Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku_id\": {{sku_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/wishlist/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist",
+                "add"
+              ]
+            },
+            "description": "Add one SKU to the logged-in customer's wishlist."
+          }
+        },
+        {
+          "name": "Remove From Wishlist",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sku_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "wishlist",
+                "{{sku_id}}"
+              ]
+            },
+            "description": "Remove one SKU from the logged-in customer's wishlist."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "description": "Authenticated review management. Creating a review requires a previous purchase.",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_slug\": \"{{product_slug}}\",\n  \"rating\": 4.5,\n  \"comment\": \"Great product!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "description": "Create a review for a purchased product. Rating accepts numeric values from 1 to 5, including decimals such as 3.5 or 4.5. New reviews are stored as pending for moderation. product_id is still accepted for backward compatibility, but product_slug is preferred."
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 3.5,\n  \"comment\": \"Good product overall\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            },
+            "description": "Update one of the logged-in customer's reviews. Rating accepts numeric values from 1 to 5, including decimals such as 3.5 or 4.5."
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            },
+            "description": "Delete one of the logged-in customer's reviews."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Promotions",
+      "description": "Read-only storefront promotion endpoints.",
+      "item": [
+        {
+          "name": "List Promotions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/promotions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "promotions"
+              ]
+            },
+            "description": "Get active promotions with linked category information."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "description": "Storefront recommendation endpoints. Personalized results require login.",
+      "item": [
+        {
+          "name": "Get Recommendations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommendations"
+              ]
+            },
+            "description": "Get personalized recommendations for logged-in customers, or trending fallback for guests."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "description": "Storefront configuration and shipping info.",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "description": "Get store identity fields such as name, phone, email, address, and currency."
+          }
+        },
+        {
+          "name": "Get Shipping Info",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shipping-info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "shipping-info"
+              ]
+            },
+            "description": "Get default shipping cost, free shipping threshold, and active shipping zones."
+          }
+        },
+        {
+          "name": "List Shipment Zones",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shipment-zones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "shipment-zones"
+              ]
+            },
+            "description": "Get active shipment zones for storefront delivery selection."
+          }
+        }
+      ]
+    }
+  ]
+}

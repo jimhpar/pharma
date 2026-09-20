@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+**/node_modules/
+vendor/
+**/vendor/
+
+# Next.js Build Output
+.next/
+**/.next/
+out/
+build/
+dist/
+
+# Logs & Cache
+*.log
+**/*.log
+.phpunit.result.cache
+.phpunit.cache
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary & Cache
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/views/.gitignore

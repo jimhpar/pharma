@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"D:/laragon/bin/php/php-8.2.9-Win32-vs16-x64/php.exe\" artisan *)",
+      "Bash(grep -A 50 \"CREATE TABLE \\\\`products\\\\`\" \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\database\\\\schema\\\\adorzotno.sql\")",
+      "Bash(grep -A 60 \"CREATE TABLE \\\\`product_skus\\\\`\" \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\database\\\\schema\\\\adorzotno.sql\")",
+      "Bash(xargs grep -l \"commission\\\\|staff\" -i)",
+      "Bash(Get-ChildItem -Path \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\database\\\\migrations\" -Filter \"*commission*\" -o Name)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\resources\\\\views\" -Directory | Where-Object {$_.Name -match \"commission|sales\"})",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\resources\\\\views\" -Directory | Where-Object {$_.Name -eq \"staff\"})",
+      "Bash(grep -n \"CREATE TABLE \\\\`sales_order_salespersons\\\\`\" \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\database\\\\schema\\\\adorzotno.sql\" -A 15)",
+      "Bash(xargs grep -l \"commission\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(cd /d \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\")",
+      "Bash(php artisan *)",
+      "PowerShell(Get-Command php)",
+      "PowerShell(php --version 2>&1)",
+      "Bash(where php *)",
+      "Bash(php -l \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\app\\\\Http\\\\Controllers\\\\ReportController.php\")",
+      "Bash(php --version)",
+      "Bash(php8 --version)",
+      "Bash(\"C:\\\\laragon\\\\bin\\\\php\\\\php8.3.14\\\\php.exe\" -l \"d:\\\\laragon\\\\www\\\\adorzotno-pos\\\\pos\\\\app\\\\Http\\\\Controllers\\\\ReportController.php\")",
+      "Bash(Get-ChildItem \"C:\\\\laragon\\\\bin\\\\php\" -Directory)",
+      "PowerShell(& \"H:\\\\Xampp\\\\php\\\\php.exe\" --version 2>&1)"
+    ]
+  }
+}
