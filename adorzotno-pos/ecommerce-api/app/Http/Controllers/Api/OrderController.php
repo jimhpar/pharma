@@ -53,8 +53,6 @@ class OrderController extends BaseApiController
         DB::beginTransaction();
         try {
             $customer = $this->authenticatedCustomer(true);
-            $branchId = $this->resolveCheckoutBranchId();
-            $warehouse = $branchId !== null ? $this->resolveCheckoutWarehouse($branchId) : null;
             $cartItems = $request->items;
             $totalAmount = 0;
             $coupon = null;
@@ -69,43 +67,31 @@ class OrderController extends BaseApiController
                 ->get()
                 ->keyBy('id');
 
-            if ($branchId === null) {
-                DB::rollBack();
+            $activeWarehouses = $this->getActiveCheckoutWarehouses();
 
-                return $this->error(null, 'No active branch is configured for online checkout', 400);
-            }
-
-            if ($warehouse === null) {
+            if ($activeWarehouses->isEmpty()) {
                 DB::rollBack();
 
                 return $this->error(null, 'No active warehouse is configured for online checkout', 400);
             }
 
-            // Validate all items first
-            foreach ($cartItems as $item) {
-                $product = $products->get((int) $item['product_id']);
+            $fulfillmentPlan = $this->planCheckoutFulfillment($cartItems, $products, $activeWarehouses);
 
-                if (! $product) {
-                    DB::rollBack();
+            if (isset($fulfillmentPlan['error'])) {
+                DB::rollBack();
 
-                    return $this->error(null, 'One or more items are not available', 400);
-                }
-
-                $quantityAvailable = $this->getProductAvailableStockForWarehouse($product, (int) $warehouse->id);
-
-                if ((int) $item['quantity'] > $quantityAvailable) {
-                    DB::rollBack();
-
-                    return $this->error(null, "{$product->name}: Only {$quantityAvailable} in stock", 400);
-                }
+                return $this->error(null, $fulfillmentPlan['error'], 400);
             }
+
+            $primaryWarehouse = $fulfillmentPlan['primary_warehouse'];
+            $branchId = (int) $primaryWarehouse->branch_id;
 
             // Create order
             $orderNumber = 'ORD-'.date('YmdHis').'-'.$user->id;
 
             $order = SalesOrder::create([
                 'branch_id' => $branchId,
-                'warehouse_id' => (int) $warehouse->id,
+                'warehouse_id' => (int) $primaryWarehouse->id,
                 'order_no' => $orderNumber,
                 'customer_id' => $customer?->id,
                 'cashier_id' => $user->id,
@@ -131,50 +117,50 @@ class OrderController extends BaseApiController
 
             // Create order items and update stock
             $subTotal = 0;
-            foreach ($cartItems as $item) {
-                $product = $products->get((int) $item['product_id']);
-                $quantity = (int) $item['quantity'];
-                $sku = $this->selectCheckoutSku($product, $quantity, (int) $warehouse->id);
-
-                if (! $sku) {
-                    DB::rollBack();
-
-                    return $this->error(null, "{$product->name}: No stockable SKU is available", 400);
-                }
+            foreach ($fulfillmentPlan['items_plan'] as $itemPlan) {
+                $product = $itemPlan['product'];
+                $itemQuantity = (int) $itemPlan['quantity'];
 
                 $unitPrice = $product->default_discount_type === 'percent' && $product->default_discount_value > 0
                     ? $product->selling_price - ($product->selling_price * $product->default_discount_value / 100)
                     : $product->selling_price - $product->default_discount_value;
-                $itemTotal = $unitPrice * $quantity;
+                $itemTotal = $unitPrice * $itemQuantity;
                 $subTotal += $itemTotal;
                 $totalAmount += $itemTotal;
 
-                $allocations = $this->deductCheckoutStock(
-                    $sku,
-                    (int) $branchId,
-                    (int) $warehouse->id,
-                    (int) $order->id,
-                    $quantity,
-                    (int) $user->id,
-                    $orderNumber
-                );
+                foreach ($itemPlan['allocations'] as $allocation) {
+                    $allocWarehouse = $allocation['warehouse'];
+                    $allocSku = $allocation['sku'];
+                    $allocQuantity = (int) $allocation['quantity'];
+                    $allocBranchId = (int) ($allocWarehouse->branch_id ?? $branchId);
 
-                foreach ($allocations as $allocation) {
-                    $allocatedQuantity = (int) $allocation['quantity'];
+                    $batchAllocations = $this->deductCheckoutStock(
+                        $allocSku,
+                        $allocBranchId,
+                        (int) $allocWarehouse->id,
+                        (int) $order->id,
+                        $allocQuantity,
+                        (int) $user->id,
+                        $orderNumber
+                    );
 
-                    SalesOrderItem::create([
-                        'sales_order_id' => $order->id,
-                        'sku_id' => $sku->id,
-                        'warehouse_id' => (int) $warehouse->id,
-                        'batch_id' => $allocation['batch_id'],
-                        'quantity' => $allocatedQuantity,
-                        'unit_price' => $unitPrice,
-                        'cost_price' => (float) ($allocation['unit_cost'] ?? $sku->cost_price ?? 0),
-                        'discount_amount' => 0,
-                        'tax_amount' => 0,
-                        'line_total' => $unitPrice * $allocatedQuantity,
-                        'returned_quantity' => 0,
-                    ]);
+                    foreach ($batchAllocations as $batchAlloc) {
+                        $allocatedQuantity = (int) $batchAlloc['quantity'];
+
+                        SalesOrderItem::create([
+                            'sales_order_id' => $order->id,
+                            'sku_id' => $allocSku->id,
+                            'warehouse_id' => (int) $allocWarehouse->id,
+                            'batch_id' => $batchAlloc['batch_id'],
+                            'quantity' => $allocatedQuantity,
+                            'unit_price' => $unitPrice,
+                            'cost_price' => (float) ($batchAlloc['unit_cost'] ?? $allocSku->cost_price ?? 0),
+                            'discount_amount' => 0,
+                            'tax_amount' => 0,
+                            'line_total' => $unitPrice * $allocatedQuantity,
+                            'returned_quantity' => 0,
+                        ]);
+                    }
                 }
             }
 
@@ -427,27 +413,225 @@ class OrderController extends BaseApiController
         }
     }
 
-    private function resolveCheckoutBranchId(): ?int
+    private function getActiveCheckoutWarehouses()
     {
-        return Branch::query()
+        return Warehouse::query()
+            ->with('branch')
             ->where(function ($query) {
                 $query->whereNull('is_active')
                     ->orWhere('is_active', true);
             })
-            ->value('id');
-    }
-
-    private function resolveCheckoutWarehouse(int $branchId): ?Warehouse
-    {
-        return Warehouse::query()
-            ->where('branch_id', $branchId)
-            ->where(function ($query) {
+            ->whereHas('branch', function ($query) {
                 $query->whereNull('is_active')
                     ->orWhere('is_active', true);
             })
             ->orderByDesc('is_default')
             ->orderBy('id')
-            ->first();
+            ->get();
+    }
+
+    private function planCheckoutFulfillment(array $cartItems, $products, $activeWarehouses): array
+    {
+        // 1. Total available check across active warehouses
+        foreach ($cartItems as $item) {
+            $product = $products->get((int) $item['product_id']);
+            if (! $product) {
+                return ['error' => 'One or more items are not available'];
+            }
+
+            $totalAvailable = (int) $activeWarehouses->sum(
+                fn (Warehouse $wh) => $this->getProductAvailableStockForWarehouse($product, (int) $wh->id)
+            );
+
+            if ((int) $item['quantity'] > $totalAvailable) {
+                return ['error' => "{$product->name}: Only {$totalAvailable} in stock"];
+            }
+        }
+
+        // 2. Check if a single warehouse can fulfill all items
+        $singleWarehouseCandidates = [];
+        foreach ($activeWarehouses as $wh) {
+            $canFulfill = true;
+            $totalStockForCart = 0;
+            foreach ($cartItems as $item) {
+                $product = $products->get((int) $item['product_id']);
+                $stock = $this->getProductAvailableStockForWarehouse($product, (int) $wh->id);
+                if ($stock < (int) $item['quantity']) {
+                    $canFulfill = false;
+                    break;
+                }
+                $totalStockForCart += $stock;
+            }
+
+            if ($canFulfill) {
+                $singleWarehouseCandidates[] = [
+                    'warehouse' => $wh,
+                    'is_default' => (bool) $wh->is_default,
+                    'total_stock' => $totalStockForCart,
+                ];
+            }
+        }
+
+        if (! empty($singleWarehouseCandidates)) {
+            // Prefer default warehouse, then warehouse with highest stock
+            usort($singleWarehouseCandidates, function ($a, $b) {
+                if ($a['is_default'] !== $b['is_default']) {
+                    return $b['is_default'] <=> $a['is_default'];
+                }
+
+                return $b['total_stock'] <=> $a['total_stock'];
+            });
+
+            $chosenWarehouse = $singleWarehouseCandidates[0]['warehouse'];
+            $itemsPlan = [];
+            foreach ($cartItems as $item) {
+                $product = $products->get((int) $item['product_id']);
+                $quantity = (int) $item['quantity'];
+                $sku = $this->selectCheckoutSku($product, $quantity, (int) $chosenWarehouse->id);
+                if (! $sku) {
+                    return ['error' => "{$product->name}: No stockable SKU is available"];
+                }
+                $itemsPlan[] = [
+                    'product' => $product,
+                    'quantity' => $quantity,
+                    'allocations' => [
+                        [
+                            'warehouse' => $chosenWarehouse,
+                            'sku' => $sku,
+                            'quantity' => $quantity,
+                        ],
+                    ],
+                ];
+            }
+
+            return [
+                'primary_warehouse' => $chosenWarehouse,
+                'primary_branch_id' => (int) $chosenWarehouse->branch_id,
+                'items_plan' => $itemsPlan,
+            ];
+        }
+
+        // 3. Multi-warehouse fulfillment:
+        // Pick primary warehouse based on which warehouse can fulfill the most items
+        $warehouseScores = [];
+        foreach ($activeWarehouses as $wh) {
+            $fulfilledItemsCount = 0;
+            foreach ($cartItems as $item) {
+                $product = $products->get((int) $item['product_id']);
+                if ($this->getProductAvailableStockForWarehouse($product, (int) $wh->id) >= (int) $item['quantity']) {
+                    $fulfilledItemsCount++;
+                }
+            }
+            $warehouseScores[] = [
+                'warehouse' => $wh,
+                'score' => $fulfilledItemsCount,
+                'is_default' => (bool) $wh->is_default,
+            ];
+        }
+
+        usort($warehouseScores, function ($a, $b) {
+            if ($a['score'] !== $b['score']) {
+                return $b['score'] <=> $a['score'];
+            }
+
+            return $b['is_default'] <=> $a['is_default'];
+        });
+
+        $primaryWarehouse = $warehouseScores[0]['warehouse'];
+        $itemsPlan = [];
+
+        foreach ($cartItems as $item) {
+            $product = $products->get((int) $item['product_id']);
+            $remaining = (int) $item['quantity'];
+            $itemAllocations = [];
+
+            // First check if primary warehouse can fulfill the entire item
+            if ($this->getProductAvailableStockForWarehouse($product, (int) $primaryWarehouse->id) >= $remaining) {
+                $sku = $this->selectCheckoutSku($product, $remaining, (int) $primaryWarehouse->id);
+                if ($sku) {
+                    $itemAllocations[] = [
+                        'warehouse' => $primaryWarehouse,
+                        'sku' => $sku,
+                        'quantity' => $remaining,
+                    ];
+                    $remaining = 0;
+                }
+            }
+
+            // Next check if another single warehouse can fulfill the entire item
+            if ($remaining > 0) {
+                foreach ($activeWarehouses as $wh) {
+                    if ($wh->id === $primaryWarehouse->id) {
+                        continue;
+                    }
+                    if ($this->getProductAvailableStockForWarehouse($product, (int) $wh->id) >= $remaining) {
+                        $sku = $this->selectCheckoutSku($product, $remaining, (int) $wh->id);
+                        if ($sku) {
+                            $itemAllocations[] = [
+                                'warehouse' => $wh,
+                                'sku' => $sku,
+                                'quantity' => $remaining,
+                            ];
+                            $remaining = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If still remaining, split across warehouses that have stock
+            if ($remaining > 0) {
+                $orderedWarehouses = $activeWarehouses->sortByDesc(fn ($w) => $w->id === $primaryWarehouse->id ? 1 : 0);
+                foreach ($orderedWarehouses as $wh) {
+                    if ($remaining <= 0) {
+                        break;
+                    }
+                    $whStock = $this->getProductAvailableStockForWarehouse($product, (int) $wh->id);
+                    if ($whStock <= 0) {
+                        continue;
+                    }
+
+                    $take = min($remaining, $whStock);
+                    $sku = $this->selectCheckoutSku($product, $take, (int) $wh->id);
+                    if (! $sku) {
+                        $sku = Sku::query()
+                            ->with('stockBalances')
+                            ->where('product_id', $product->id)
+                            ->get()
+                            ->first(fn ($s) => $this->getSkuAvailableStockForWarehouse($s, (int) $wh->id) > 0);
+                        if ($sku) {
+                            $skuStock = $this->getSkuAvailableStockForWarehouse($sku, (int) $wh->id);
+                            $take = min($take, $skuStock);
+                        }
+                    }
+
+                    if ($sku && $take > 0) {
+                        $itemAllocations[] = [
+                            'warehouse' => $wh,
+                            'sku' => $sku,
+                            'quantity' => $take,
+                        ];
+                        $remaining -= $take;
+                    }
+                }
+            }
+
+            if ($remaining > 0) {
+                return ['error' => "{$product->name}: Unable to allocate sufficient stock across warehouses"];
+            }
+
+            $itemsPlan[] = [
+                'product' => $product,
+                'quantity' => (int) $item['quantity'],
+                'allocations' => $itemAllocations,
+            ];
+        }
+
+        return [
+            'primary_warehouse' => $primaryWarehouse,
+            'primary_branch_id' => (int) $primaryWarehouse->branch_id,
+            'items_plan' => $itemsPlan,
+        ];
     }
 
     private function selectCheckoutSku(Product $product, int $quantity, int $warehouseId): ?Sku
@@ -566,13 +750,20 @@ class OrderController extends BaseApiController
     {
         $warehouseId = $item->warehouse_id ?: $order->warehouse_id;
 
-        if ($warehouseId === null || $item->sku_id === null || $order->branch_id === null) {
+        if ($warehouseId === null || $item->sku_id === null) {
+            return;
+        }
+
+        $warehouse = Warehouse::query()->find((int) $warehouseId);
+        $branchId = (int) ($warehouse?->branch_id ?? $order->branch_id);
+
+        if ($branchId <= 0) {
             return;
         }
 
         $quantity = (int) $item->quantity;
         $balance = StockBalance::query()->lockForUpdate()->firstOrNew([
-            'branch_id' => (int) $order->branch_id,
+            'branch_id' => $branchId,
             'warehouse_id' => (int) $warehouseId,
             'sku_id' => (int) $item->sku_id,
             'batch_id' => $item->batch_id,
@@ -594,7 +785,7 @@ class OrderController extends BaseApiController
         }
 
         InventoryTransaction::create([
-            'branch_id' => (int) $order->branch_id,
+            'branch_id' => $branchId,
             'warehouse_id' => (int) $warehouseId,
             'sku_id' => (int) $item->sku_id,
             'batch_id' => $item->batch_id,

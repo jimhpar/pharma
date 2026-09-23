@@ -29,12 +29,16 @@ class AppServiceProvider extends ServiceProvider
         date_default_timezone_set(config('app.timezone'));
         Carbon::setLocale(config('app.locale'));
 
-        if (Schema::hasTable('permissions')) {
-            Permission::query()->upsert(
-                PermissionCatalog::definitions(),
-                ['slug'],
-                ['module', 'action', 'description']
-            );
+        try {
+            if (Schema::hasTable('permissions')) {
+                Permission::query()->upsert(
+                    PermissionCatalog::definitions(),
+                    ['slug'],
+                    ['module', 'action', 'description']
+                );
+            }
+        } catch (\Throwable $e) {
+            // Database not yet connected or tables not yet migrated
         }
 
         View::composer('*', function ($view) {

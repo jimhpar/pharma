@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
@@ -99,9 +99,15 @@ export default function ProductCard({ product }) {
         }}
       >
         {!inCart ? (
+          /* =========================================================================
+             PRODUCT CARD "ADD TO CART" BUTTON (কার্ডের বাটনের কালার অপশন)
+             - কালার পরিবর্তন করতে নিচের ক্লাসে পছন্দমতো ক্লাস দিন (যেমন bg-primary hover:bg-secondary ইত্যাদি)
+             ========================================================================= */
           <button
+            type="button"
             onClick={handleAdd}
-            className="flex h-10 w-12 items-center justify-center rounded-lg border border-primary/20 bg-white text-primary transition-all hover:bg-primary hover:text-white"
+            className="flex h-10 w-12 items-center justify-center rounded-lg border border-primary/20 bg-white text-primary transition-all hover:bg-primary hover:text-white cursor-pointer active:scale-95"
+            title="Add to Cart"
           >
             <ShoppingCart size={18} />
           </button>

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.4.3, for Win64 (x86_64)
 --
--- Host: localhost    Database: adorzotno
+-- Host: 127.0.0.1    Database: adorzotno
 -- ------------------------------------------------------
 -- Server version	8.4.3
 
@@ -14,14 +14,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Current Database: `adorzotno`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `adorzotno` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `adorzotno`;
 
 --
 -- Table structure for table `accounting_journal_lines`
@@ -406,7 +398,7 @@ CREATE TABLE `cache` (
 
 LOCK TABLES `cache` WRITE;
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
-INSERT INTO `cache` VALUES ('356a192b7913b04c54574d18c28d46e6395428ab','i:6;',1789927175),('356a192b7913b04c54574d18c28d46e6395428ab:timer','i:1789927175;',1789927175),('5c785c036466adea360111aa28563bfd556b5fba','i:18;',1789928626),('5c785c036466adea360111aa28563bfd556b5fba:timer','i:1789928626;',1789928626);
+INSERT INTO `cache` VALUES ('356a192b7913b04c54574d18c28d46e6395428ab','i:2;',1790017011),('356a192b7913b04c54574d18c28d46e6395428ab:timer','i:1790017011;',1790017011),('5c785c036466adea360111aa28563bfd556b5fba','i:6;',1790017011),('5c785c036466adea360111aa28563bfd556b5fba:timer','i:1790017011;',1790017011);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1867,7 +1859,7 @@ CREATE TABLE `permissions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_permissions_slug` (`slug`),
   UNIQUE KEY `uq_permissions_module_action` (`module`,`action`)
-) ENGINE=InnoDB AUTO_INCREMENT=118161 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=121639 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1909,7 +1901,7 @@ CREATE TABLE `personal_access_tokens` (
 
 LOCK TABLES `personal_access_tokens` WRITE;
 /*!40000 ALTER TABLE `personal_access_tokens` DISABLE KEYS */;
-INSERT INTO `personal_access_tokens` VALUES (1,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','9050885dd4eb433687c51685dc6d1576186d189e42cc8da841559c271f63d530','[\"*\"]',NULL,NULL,'2026-09-20 11:51:59','2026-09-20 11:51:59'),(3,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','b5653784eb803c53c34b9499a8047bff9fa11cb64adcbf2db1ddc2212b71b1fa','[\"*\"]',NULL,NULL,'2026-09-20 11:57:08','2026-09-20 11:57:08'),(4,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','05c84334e4a6bb80b8398bf67d695eba6caec461fbcd34efb643847285acaac5','[\"*\"]',NULL,NULL,'2026-09-20 11:57:16','2026-09-20 11:57:16'),(5,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36','1301eecfa28e30a5b4f242224f131574207b9964698a764e683556e9da7fc334','[\"*\"]','2026-09-20 17:58:52',NULL,'2026-09-20 11:58:52','2026-09-20 11:58:52');
+INSERT INTO `personal_access_tokens` VALUES (1,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','9050885dd4eb433687c51685dc6d1576186d189e42cc8da841559c271f63d530','[\"*\"]',NULL,NULL,'2026-09-20 11:51:59','2026-09-20 11:51:59'),(3,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','b5653784eb803c53c34b9499a8047bff9fa11cb64adcbf2db1ddc2212b71b1fa','[\"*\"]',NULL,NULL,'2026-09-20 11:57:08','2026-09-20 11:57:08'),(4,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444','05c84334e4a6bb80b8398bf67d695eba6caec461fbcd34efb643847285acaac5','[\"*\"]',NULL,NULL,'2026-09-20 11:57:16','2026-09-20 11:57:16'),(5,'App\\Models\\User',1,'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36','1301eecfa28e30a5b4f242224f131574207b9964698a764e683556e9da7fc334','[\"*\"]','2026-09-21 18:55:52',NULL,'2026-09-20 11:58:52','2026-09-21 12:55:52');
 /*!40000 ALTER TABLE `personal_access_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3525,7 +3517,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Super Admin','admin@gmail.com','01234567899','avatar.png','$2y$12$pBHeGNB0jhfnQkEX0i5Nw.pJUqkBA6gpGT7eCvZnNRH/Q//6LKFnW','active','2026-09-20 17:58:52','6UzHFfyxWDlrcax91HYY6rIrOsv59rPv8lBj5CFCgpSp34nrmgLHbUdiC9qL','2026-04-22 00:59:07','2026-04-22 07:59:07','2026-09-20 11:58:52'),(3,'Mirpur Admin','admin.mirpur@gmail.com','01234567898',NULL,'$2y$12$6HFyHtU3SGaExrteUqKIUODnNuNIX4V8.oiVt8Lg3ZkK2qeZ2rqRO','active',NULL,'SE6r1rYBL8NlxDfigdaPh1RPndh7gEEUT3D8SEVJK3oA1W6NLjUdHQSY4tt6',NULL,'2026-04-24 17:50:03','2026-06-16 14:31:50');
+INSERT INTO `users` VALUES (1,'Super Admin','admin@gmail.com','01234567899','avatar.png','$2y$12$pBHeGNB0jhfnQkEX0i5Nw.pJUqkBA6gpGT7eCvZnNRH/Q//6LKFnW','active','2026-09-20 17:58:52','UXFJFPvWYTRWCESsLLasr8Quaq0FwRmmfCOfdYBhqM2yNbdtjp8Dv2nP1elC','2026-04-22 00:59:07','2026-04-22 07:59:07','2026-09-20 19:00:15'),(3,'Mirpur Admin','admin.mirpur@gmail.com','01234567898',NULL,'$2y$12$6HFyHtU3SGaExrteUqKIUODnNuNIX4V8.oiVt8Lg3ZkK2qeZ2rqRO','active',NULL,'SE6r1rYBL8NlxDfigdaPh1RPndh7gEEUT3D8SEVJK3oA1W6NLjUdHQSY4tt6',NULL,'2026-04-24 17:50:03','2026-06-16 14:31:50');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3641,10 +3633,6 @@ LOCK TABLES `wishlists` WRITE;
 /*!40000 ALTER TABLE `wishlists` DISABLE KEYS */;
 /*!40000 ALTER TABLE `wishlists` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping routines for database 'adorzotno'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -3655,4 +3643,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-21  0:32:43
+-- Dump completed on 2026-09-22  1:12:00

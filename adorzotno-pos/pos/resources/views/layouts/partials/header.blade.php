@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url('public/admin/dist/assets/compiled/css/app.css')}}">
     <link rel="stylesheet" href="{{ url('public/admin/dist/assets/compiled/css/app-dark.css')}}">
     <link rel="stylesheet" href="{{ url('public/admin/dist/assets/compiled/css/iconly.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Datatable CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
@@ -21,7 +22,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="{{ url('public/admin/dist/assets/extensions/choices.js/public/assets/styles/choices.css')}}">
-    <link rel="stylesheet" href="{{ url('public/admin/dist/assets/compiled/css/admin-shell.css') }}">
+    <link rel="stylesheet" href="{{ url('public/admin/dist/assets/compiled/css/admin-shell.css') }}?v=2.6">
 
     @yield('header.css')
 

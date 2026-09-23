@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -n 'protected $fillable\\\\|brand\\\\|company\\\\|unit\\\\|pack\\\\|content\\\\|weight\\\\|category' d:/laragon/www/adorzotno-pos/pos/app/Models/Product.php)",
-      "Bash(grep -n 'protected $fillable\\\\|discount\\\\|discount_type\\\\|unit\\\\|pack' d:/laragon/www/adorzotno-pos/pos/app/Models/Sku.php)"
-    ]
-  }
-}

@@ -282,37 +282,68 @@ export default function ProductGrid({
               </div>
             </div>
 
-            <div className="mb-6 flex gap-4">
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedProduct?.inStock}
-                className={`max-sm:flex-1 flex items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition sm:px-10 ${selectedProduct?.inStock
-                  ? "bg-primary hover:bg-secondary"
-                  : "cursor-not-allowed bg-gray-300 text-gray-500"
-                  }`}
-              >
-                <ShoppingCart size={20} />
-                Add to Cart
-              </button>
+            {/* =========================================================================
+                ADD TO CART BUTTON (সহজে বাটনের টেক্সট ও কালার পরিবর্তন করার অপশন)
+                - টেক্সট পরিবর্তন করতে: 'buttonText' এ আপনার পছন্দের লেখা দিন (যেমন "Add to cart now")
+                - কালার পরিবর্তন করতে:
+                  (১) Tailwind ক্লাস: 'buttonColorClass' (যেমন "bg-primary hover:bg-secondary text-white" বা "bg-blue-600 hover:bg-blue-700 text-white")
+                  (২) অথবা সরাসরি যেকোনো HEX কালার কোড: 'customHexColor' (যেমন "#2563eb", "#e11d48", ইত্যাদি)
+               ========================================================================= */}
+            {(() => {
+              // -------------------------------------------------------------
+              // 🔧 EDIT HERE: বাটন টেক্সট ও কালার অপশন
+              // -------------------------------------------------------------
+              const buttonText = "Add to Cart";
+              const buttonColorClass = "bg-primary hover:bg-secondary text-white";
+              const customHexColor = ""; // যেমন "#2563eb" (খালি রাখলে buttonColorClass কাজ করবে)
+              // -------------------------------------------------------------
 
-              <button
-                onClick={handleWishlistToggle}
-                disabled={isWishlistLoading}
-                className={`rounded-lg border-2 p-3 transition ${isWishlisted
-                  ? "border-red-500 bg-red-50 text-red-500"
-                  : "border-primary text-primary hover:bg-teal-50"
-                  } ${isWishlistLoading ? "cursor-not-allowed opacity-60" : ""}`}
-              >
-                <Heart
-                  size={24}
-                  className={isWishlisted ? "fill-current" : ""}
-                />
-              </button>
+              return (
+                <div className="mb-6 flex gap-4">
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={!selectedProduct?.inStock}
+                    style={
+                      selectedProduct?.inStock && customHexColor
+                        ? { backgroundColor: customHexColor, color: "#ffffff" }
+                        : undefined
+                    }
+                    className={`max-sm:flex-1 flex items-center justify-center gap-2 rounded-lg py-3 font-semibold transition sm:px-10 ${
+                      selectedProduct?.inStock
+                        ? `${buttonColorClass} cursor-pointer active:scale-98`
+                        : "cursor-not-allowed bg-gray-300 text-gray-500"
+                    }`}
+                  >
+                    <ShoppingCart size={20} />
+                    <span>{buttonText}</span>
+                  </button>
 
-              <button className="rounded-lg border-2 border-gray-300 p-3 text-gray-600 transition hover:bg-gray-50">
-                <Share2 size={24} />
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    onClick={handleWishlistToggle}
+                    disabled={isWishlistLoading}
+                    className={`rounded-lg border-2 p-3 transition ${
+                      isWishlisted
+                        ? "border-red-500 bg-red-50 text-red-500"
+                        : "border-primary text-primary hover:bg-teal-50"
+                    } ${isWishlistLoading ? "cursor-not-allowed opacity-60" : ""}`}
+                  >
+                    <Heart
+                      size={24}
+                      className={isWishlisted ? "fill-current" : ""}
+                    />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="rounded-lg border-2 border-gray-300 p-3 text-gray-600 transition hover:bg-gray-50"
+                  >
+                    <Share2 size={24} />
+                  </button>
+                </div>
+              );
+            })()}
 
             <div className="grid grid-cols-1 gap-6 border-t md:grid-cols-2">
               <div className="space-y-2 pt-6 text-sm">

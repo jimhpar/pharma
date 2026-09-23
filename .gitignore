@@ -8,8 +8,14 @@ vendor/
 .next/
 **/.next/
 out/
-build/
+/build/
+
+# Dist & Admin assets
 dist/
+!adorzotno-pos/pos/public/admin/dist/**
+!adorzotno-pos/pos/public/public/admin/dist/**
+!adorzotno-pos/pos/public/build/**
+!adorzotno-pos/demo-pos/public/build/**
 
 # Logs & Cache
 *.log
@@ -28,6 +34,7 @@ dist/
 Thumbs.db
 .idea/
 .vscode/
+.claude/
 *.suo
 *.ntvs*
 *.njsproj
@@ -46,3 +53,15 @@ storage/framework/views/*
 adorzotno-frontend/
 adorzotno.sql
 start-local.bat
+
+# Explicit Media & Database Inclusions
+!database/adorzotno_complete.sql
+!adorzotno-pos/pos/public/productImage/**
+!adorzotno-pos/pos/public/bannerImage/**
+!adorzotno-pos/pos/public/brandLogo/**
+!adorzotno-pos/pos/public/categoryImage/**
+!adorzotno-pos/pos/public/categoryPromotion/**
+!adorzotno-pos/pos/public/expenseAttachment/**
+!adorzotno-pos/pos/public/settingImage/**
+!adorzotno/public/**
+
